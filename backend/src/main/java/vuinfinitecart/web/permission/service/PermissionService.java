@@ -86,8 +86,14 @@ public class PermissionService {
     }
 
     @Transactional(readOnly = true)
-    public List<PermissionGroupResponse> getAllGroups() {
-        return permissionGroupRepository.findAll().stream()
+    public List<PermissionGroupResponse> getAllGroups(String keyword) {
+        List<PermissionGroup> groups;
+        if (keyword != null && !keyword.isBlank()) {
+            groups = permissionGroupRepository.findByNameContainingIgnoreCase(keyword);
+        } else {
+            groups = permissionGroupRepository.findAll();
+        }
+        return groups.stream()
                 .map(this::mapToGroupResponse)
                 .collect(Collectors.toList());
     }

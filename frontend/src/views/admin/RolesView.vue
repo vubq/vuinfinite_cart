@@ -17,6 +17,19 @@
       </VButton>
     </div>
 
+    <!-- Filters and Search -->
+    <div class="flex items-center gap-4 bg-white/50 p-2 rounded-2xl border border-slate-200/50 backdrop-blur-sm">
+        <div class="relative flex-1">
+            <input 
+                v-model="filters.search" 
+                type="text" 
+                placeholder="Search roles by name..." 
+                class="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+            />
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </div>
+    </div>
+
     <!-- Roles Grid -->
     <div v-if="loading" class="p-20 flex justify-center items-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
@@ -120,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue'
+import { ref, onMounted, reactive, computed, watch } from 'vue'
 import VButton from '@/components/ui/VButton.vue'
 import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import VModal from '@/components/ui/VModal.vue'
@@ -136,6 +149,11 @@ const showConfirmDialog = ref(false)
 const isEditing = ref(false)
 const selectedId = ref<number | null>(null)
 const permSearch = ref('')
+
+const filters = reactive({
+    search: ''
+})
+
 const confirmState = reactive({
     title: '',
     message: '',
@@ -161,7 +179,10 @@ const form = reactive({
 const fetchGroups = async () => {
   loading.value = true
   try {
-    const { data } = await adminApi.get('/admin/system/permission-groups')
+    const params: any = {}
+    if (filters.search) params.keyword = filters.search
+
+    const { data } = await adminApi.get('/admin/system/permission-groups', { params })
     groups.value = unwrapApiData(data, [])
   } catch (err) {
     console.error('Failed to fetch groups', err)
@@ -170,6 +191,15 @@ const fetchGroups = async () => {
     loading.value = false
   }
 }
+
+// Debounced search logic
+let searchTimeout: any = null
+watch(() => filters.search, () => {
+    if (searchTimeout) clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+        fetchGroups()
+    }, 400)
+})
 
 const fetchPermissions = async () => {
     try {

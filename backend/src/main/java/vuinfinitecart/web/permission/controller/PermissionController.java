@@ -45,7 +45,7 @@ public class PermissionController {
 
     @GetMapping("/permission-groups")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public ApiResponse<List<PermissionGroupResponse>> getAllGroups() {
-        return ApiResponse.ok(permissionService.getAllGroups());
+    public ApiResponse<List<PermissionGroupResponse>> getAllGroups(@RequestParam(required = false) String keyword) {
+        return ApiResponse.ok(permissionService.getAllGroups(keyword));
     }
 }
