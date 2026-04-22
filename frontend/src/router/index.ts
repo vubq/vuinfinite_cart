@@ -61,6 +61,12 @@ const router = createRouter({
           meta: { requiresAdmin: true }
         },
         {
+          path: 'media',
+          name: 'admin-media',
+          component: () => import('@/views/admin/MediaView.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
           path: 'system',
           name: 'admin-admins',
           component: () => import('@/views/admin/AdminsView.vue'),

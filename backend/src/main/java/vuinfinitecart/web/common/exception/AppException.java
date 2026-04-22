@@ -35,4 +35,8 @@ public class AppException extends RuntimeException {
     public static AppException conflict(String message) {
         return new AppException(HttpStatus.CONFLICT, "CONFLICT", message);
     }
+
+    public static AppException internalError(String message) {
+        return new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", message);
+    }
 }
