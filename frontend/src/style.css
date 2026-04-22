@@ -11,3 +11,9 @@
 html, body {
   @apply antialiased text-slate-800 bg-white font-sans;
 }
+
+@layer base {
+  button, [role="button"] {
+    cursor: pointer;
+  }
+}

@@ -1,12 +1,13 @@
 package vuinfinitecart.web.admin.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import vuinfinitecart.web.admin.entity.Admin;
 
 import java.util.Optional;
 
-public interface AdminRepository extends JpaRepository<Admin, Long> {
+public interface AdminRepository extends JpaRepository<Admin, Long>, JpaSpecificationExecutor<Admin> {
     @Query("SELECT DISTINCT a FROM Admin a " +
            "LEFT JOIN FETCH a.permissionGroups pg " +
            "LEFT JOIN FETCH pg.permissions " +

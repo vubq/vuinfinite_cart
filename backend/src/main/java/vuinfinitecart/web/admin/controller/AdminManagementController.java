@@ -7,6 +7,10 @@ import vuinfinitecart.web.admin.dto.AdminCreateRequest;
 import vuinfinitecart.web.admin.dto.AdminPermissionUpdateRequest;
 import vuinfinitecart.web.admin.dto.AdminResponse;
 import vuinfinitecart.web.admin.entity.Admin;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import vuinfinitecart.web.common.response.PageResponse;
+import vuinfinitecart.web.common.response.ApiResponse;
 import vuinfinitecart.web.admin.service.AdminManagementService;
 
 import java.util.List;
@@ -20,25 +24,28 @@ public class AdminManagementController {
 
     @PostMapping("/admins")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public AdminResponse createAdmin(@RequestBody AdminCreateRequest request) {
-        return adminManagementService.createAdmin(request);
+    public ApiResponse<AdminResponse> createAdmin(@RequestBody AdminCreateRequest request) {
+        return ApiResponse.ok("Officer invited successfully", adminManagementService.createAdmin(request));
     }
 
     @PutMapping("/admins/{id}/permissions")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public AdminResponse updatePermissions(@PathVariable Long id, @RequestBody AdminPermissionUpdateRequest request) {
-        return adminManagementService.updatePermissions(id, request);
+    public ApiResponse<AdminResponse> updatePermissions(@PathVariable Long id, @RequestBody AdminPermissionUpdateRequest request) {
+        return ApiResponse.ok("Permissions updated successfully", adminManagementService.updatePermissions(id, request));
     }
 
     @GetMapping("/admins")
     @PreAuthorize("hasRole('SUPERADMIN') or hasAuthority('admins:read')")
-    public List<AdminResponse> getAllAdmins() {
-        return adminManagementService.getAllAdmins();
+    public ApiResponse<PageResponse<AdminResponse>> getAllAdmins(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Admin.AdminStatus status,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ApiResponse.ok(adminManagementService.getAllAdmins(search, status, pageable));
     }
 
     @PatchMapping("/admins/{id}/status")
     @PreAuthorize("hasRole('SUPERADMIN') or hasAuthority('admins:update')")
-    public AdminResponse updateAdminStatus(@PathVariable Long id, @RequestParam Admin.AdminStatus status) {
-        return adminManagementService.updateAdminStatus(id, status);
+    public ApiResponse<AdminResponse> updateAdminStatus(@PathVariable Long id, @RequestParam Admin.AdminStatus status) {
+        return ApiResponse.ok("Status updated successfully", adminManagementService.updateAdminStatus(id, status));
     }
 }

@@ -20,7 +20,7 @@ withDefaults(defineProps<Props>(), {
   <button
     :type="type"
     :disabled="disabled || loading"
-    class="relative inline-flex items-center justify-center font-extrabold transition-all active:scale-[0.96] disabled:opacity-50 disabled:pointer-events-none rounded-2xl tracking-tight"
+    class="relative inline-flex items-center justify-center font-extrabold transition-all active:scale-[0.96] disabled:opacity-50 disabled:pointer-events-none rounded-2xl tracking-tight cursor-pointer"
     :class="[
       // Variants
       variant === 'primary' && 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xl shadow-emerald-600/15 hover:shadow-emerald-600/30',

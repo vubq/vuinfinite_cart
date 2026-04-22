@@ -45,10 +45,10 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button @click="openEditModal(group)" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                    <button @click="openEditModal(group)" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
-                    <button @click="confirmDelete(group)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                    <button @click="confirmDelete(group)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </div>
@@ -106,13 +106,23 @@
             </VButton>
         </template>
     </VModal>
+
+    <VConfirmDialog
+      v-model="showConfirmDialog"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-text="confirmState.confirmText"
+      :variant="confirmState.variant"
+      :loading="submitting"
+      @confirm="runConfirmedAction"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed } from 'vue'
-import VCard from '@/components/ui/VCard.vue'
 import VButton from '@/components/ui/VButton.vue'
+import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import VModal from '@/components/ui/VModal.vue'
 import VInput from '@/components/ui/VInput.vue'
 import adminApi from '@/api/adminApi'
@@ -122,9 +132,25 @@ const availablePermissions = ref<any[]>([])
 const loading = ref(true)
 const submitting = ref(false)
 const showModal = ref(false)
+const showConfirmDialog = ref(false)
 const isEditing = ref(false)
 const selectedId = ref<number | null>(null)
 const permSearch = ref('')
+const confirmState = reactive({
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'warning' as 'info' | 'warning' | 'danger' | 'success',
+    action: null as null | (() => Promise<void>)
+})
+
+const unwrapApiData = <T>(payload: T | { data?: T } | null | undefined, fallback: T): T => {
+  if (payload && typeof payload === 'object' && 'data' in payload) {
+    return (payload.data as T) ?? fallback
+  }
+
+  return (payload as T) ?? fallback
+}
 
 const form = reactive({
     name: '',
@@ -136,9 +162,10 @@ const fetchGroups = async () => {
   loading.value = true
   try {
     const { data } = await adminApi.get('/admin/system/permission-groups')
-    groups.value = data
+    groups.value = unwrapApiData(data, [])
   } catch (err) {
     console.error('Failed to fetch groups', err)
+    groups.value = []
   } finally {
     loading.value = false
   }
@@ -147,9 +174,10 @@ const fetchGroups = async () => {
 const fetchPermissions = async () => {
     try {
         const { data } = await adminApi.get('/admin/system/permissions')
-        availablePermissions.value = data
+        availablePermissions.value = unwrapApiData(data, [])
     } catch (err) {
         console.error('Failed to fetch permission catalog', err)
+        availablePermissions.value = []
     }
 }
 
@@ -187,37 +215,60 @@ const togglePerm = (id: number) => {
 
 const handleSubmit = async () => {
     if (!form.name) return
-    submitting.value = true
-    const payload = {
-        name: form.name,
-        description: form.description,
-        permissionIds: Array.from(form.permissionIds)
-    }
-    
-    try {
-        if (isEditing.value && selectedId.value) {
-            await adminApi.put(`/admin/system/permission-groups/${selectedId.value}`, payload)
-        } else {
-            await adminApi.post('/admin/system/permission-groups', payload)
+    confirmState.title = isEditing.value ? 'Confirm Role Update' : 'Create New Role'
+    confirmState.message = isEditing.value
+        ? `Save changes to "${form.name}" and update its permission mapping?`
+        : `Create the role "${form.name}" with the selected permissions?`
+    confirmState.confirmText = isEditing.value ? 'Save Changes' : 'Create Role'
+    confirmState.variant = isEditing.value ? 'info' : 'success'
+    confirmState.action = async () => {
+        submitting.value = true
+        const payload = {
+            name: form.name,
+            description: form.description,
+            permissionIds: Array.from(form.permissionIds)
         }
-        showModal.value = false
-        await fetchGroups()
-    } catch (err) {
-        console.error('Failed to save role', err)
-    } finally {
-        submitting.value = false
+
+        try {
+            if (isEditing.value && selectedId.value) {
+                await adminApi.put(`/admin/system/permission-groups/${selectedId.value}`, payload)
+            } else {
+                await adminApi.post('/admin/system/permission-groups', payload)
+            }
+            showModal.value = false
+            showConfirmDialog.value = false
+            await fetchGroups()
+        } catch (err) {
+            console.error('Failed to save role', err)
+        } finally {
+            submitting.value = false
+        }
     }
+    showConfirmDialog.value = true
 }
 
 const confirmDelete = async (group: any) => {
-    if (!confirm(`Are you sure you want to delete "${group.name}"? All assigned admins will lose these permissions immediately.`)) return
-    
-    try {
-        await adminApi.delete(`/admin/system/permission-groups/${group.id}`)
-        await fetchGroups()
-    } catch (err) {
-        console.error('Failed to delete role', err)
+    confirmState.title = 'Delete Role'
+    confirmState.message = `Delete "${group.name}"? All admins assigned to this role will lose those permissions immediately.`
+    confirmState.confirmText = 'Delete Role'
+    confirmState.variant = 'danger'
+    confirmState.action = async () => {
+        submitting.value = true
+        try {
+            await adminApi.delete(`/admin/system/permission-groups/${group.id}`)
+            showConfirmDialog.value = false
+            await fetchGroups()
+        } catch (err) {
+            console.error('Failed to delete role', err)
+        } finally {
+            submitting.value = false
+        }
     }
+    showConfirmDialog.value = true
+}
+
+const runConfirmedAction = async () => {
+    await confirmState.action?.()
 }
 
 onMounted(() => {

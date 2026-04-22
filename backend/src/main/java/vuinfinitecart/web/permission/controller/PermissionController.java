@@ -3,6 +3,7 @@ package vuinfinitecart.web.permission.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vuinfinitecart.web.common.response.ApiResponse;
 import vuinfinitecart.web.permission.dto.PermissionGroupRequest;
 import vuinfinitecart.web.permission.dto.PermissionGroupResponse;
 import vuinfinitecart.web.permission.dto.PermissionResponse;
@@ -19,31 +20,32 @@ public class PermissionController {
 
     @PostMapping("/permission-groups")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public PermissionGroupResponse createGroup(@RequestBody PermissionGroupRequest request) {
-        return permissionService.createGroup(request);
+    public ApiResponse<PermissionGroupResponse> createGroup(@RequestBody PermissionGroupRequest request) {
+        return ApiResponse.ok("Permission group created successfully", permissionService.createGroup(request));
     }
 
     @PutMapping("/permission-groups/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public PermissionGroupResponse updateGroup(@PathVariable Long id, @RequestBody PermissionGroupRequest request) {
-        return permissionService.updateGroup(id, request);
+    public ApiResponse<PermissionGroupResponse> updateGroup(@PathVariable Long id, @RequestBody PermissionGroupRequest request) {
+        return ApiResponse.ok("Permission group updated successfully", permissionService.updateGroup(id, request));
     }
 
     @DeleteMapping("/permission-groups/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public void deleteGroup(@PathVariable Long id) {
+    public ApiResponse<Void> deleteGroup(@PathVariable Long id) {
         permissionService.deleteGroup(id);
+        return ApiResponse.ok("Permission group deleted successfully");
     }
 
     @GetMapping("/permissions")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public List<PermissionResponse> getAllPermissions() {
-        return permissionService.getAllPermissions();
+    public ApiResponse<List<PermissionResponse>> getAllPermissions() {
+        return ApiResponse.ok(permissionService.getAllPermissions());
     }
 
     @GetMapping("/permission-groups")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public List<PermissionGroupResponse> getAllGroups() {
-        return permissionService.getAllGroups();
+    public ApiResponse<List<PermissionGroupResponse>> getAllGroups() {
+        return ApiResponse.ok(permissionService.getAllGroups());
     }
 }

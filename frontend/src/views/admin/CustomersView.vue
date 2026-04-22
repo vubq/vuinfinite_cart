@@ -83,6 +83,16 @@
         </table>
       </div>
     </VCard>
+
+    <VConfirmDialog
+      v-model="showConfirmDialog"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-text="confirmState.confirmText"
+      :variant="confirmState.variant"
+      :loading="submitting"
+      @confirm="runConfirmedAction"
+    />
   </div>
 </template>
 
@@ -90,10 +100,20 @@
 import { ref, onMounted } from 'vue'
 import VCard from '@/components/ui/VCard.vue'
 import VButton from '@/components/ui/VButton.vue'
+import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import adminApi from '@/api/adminApi'
 
 const customers = ref<any[]>([])
 const loading = ref(true)
+const submitting = ref(false)
+const showConfirmDialog = ref(false)
+const confirmState = ref({
+  title: '',
+  message: '',
+  confirmText: 'Confirm',
+  variant: 'warning' as 'info' | 'warning' | 'danger' | 'success',
+  action: null as null | (() => Promise<void>)
+})
 
 const fetchCustomers = async () => {
   loading.value = true
@@ -108,12 +128,31 @@ const fetchCustomers = async () => {
 }
 
 const updateStatus = async (customer: any, newStatus: string) => {
-  try {
-    await adminApi.patch(`/admin/crm/customers/${customer.id}/status?status=${newStatus}`)
-    customer.status = newStatus
-  } catch (err) {
-    console.error('Security action failed', err)
+  confirmState.value = {
+    title: newStatus === 'BANNED' ? 'Restrict Customer Account' : 'Restore Customer Account',
+    message: newStatus === 'BANNED'
+      ? `Restrict "${customer.name}" now? Their refresh access will be revoked immediately.`
+      : `Restore "${customer.name}" so they can access their account again?`,
+    confirmText: newStatus === 'BANNED' ? 'Restrict Account' : 'Restore Access',
+    variant: newStatus === 'BANNED' ? 'danger' : 'success',
+    action: async () => {
+      submitting.value = true
+      try {
+        await adminApi.patch(`/admin/crm/customers/${customer.id}/status?status=${newStatus}`)
+        customer.status = newStatus
+        showConfirmDialog.value = false
+      } catch (err) {
+        console.error('Security action failed', err)
+      } finally {
+        submitting.value = false
+      }
+    }
   }
+  showConfirmDialog.value = true
+}
+
+const runConfirmedAction = async () => {
+  await confirmState.value.action?.()
 }
 
 const statusClass = (status: string) => {

@@ -9,6 +9,10 @@ import vuinfinitecart.web.admin.repository.AdminRepository;
 import vuinfinitecart.web.common.exception.AppException;
 import vuinfinitecart.web.common.security.SecurityUtils;
 import vuinfinitecart.web.permission.entity.Permission;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import vuinfinitecart.web.common.response.PageResponse;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import vuinfinitecart.web.admin.dto.AdminCreateRequest;
@@ -88,10 +92,30 @@ public class AdminManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminResponse> getAllAdmins() {
-        return adminRepository.findAllWithDetails().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<AdminResponse> getAllAdmins(String search, Admin.AdminStatus status, Pageable pageable) {
+        Specification<Admin> spec = Specification.where(null);
+
+        if (search != null && !search.trim().isEmpty()) {
+            String searchPattern = "%" + search.trim().toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> 
+                cb.or(
+                    cb.like(cb.lower(root.get("fullName")), searchPattern),
+                    cb.like(cb.lower(root.get("email")), searchPattern),
+                    cb.like(cb.lower(root.get("username")), searchPattern)
+                )
+            );
+        }
+
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        // Fetch details (groups/permissions) to avoid N+1
+        // Note: Pagination with Fetch Joins on 1-to-N or M-to-N can lead to memory pagination warnings.
+        // However, Admin management usually has small total record counts.
+        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        
+        return PageResponse.of(adminPage.map(this::mapToResponse));
     }
 
     @Transactional

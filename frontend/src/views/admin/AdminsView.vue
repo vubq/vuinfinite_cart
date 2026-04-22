@@ -17,6 +17,27 @@
       </VButton>
     </div>
 
+    <!-- Filters and Search -->
+    <div class="flex items-center gap-4 bg-white/50 p-2 rounded-2xl border border-slate-200/50 backdrop-blur-sm">
+        <div class="relative flex-1">
+            <input 
+                v-model="filters.search" 
+                type="text" 
+                placeholder="Search by name, email or username..." 
+                class="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+            />
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </div>
+        <div class="w-52">
+            <VSelect
+                v-model="filters.status"
+                :options="statusOptions"
+                placeholder="All Statuses"
+                size="sm"
+            />
+        </div>
+    </div>
+
     <!-- ... existing table ... -->
     <VCard class="overflow-hidden border-slate-200/60 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
       <!-- ... loading and empty cases ... -->
@@ -34,10 +55,37 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-100">
-              <th class="px-7 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Officer</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Access Level</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-              <th class="px-7 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+              <th class="px-7 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em]">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
+                  @click="toggleSort('fullName')"
+                >
+                  <span>Officer</span>
+                  <Icon :icon="sortIcon('fullName')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('fullName')" />
+                </button>
+              </th>
+              <th class="px-6 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em]">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
+                  @click="toggleSort('superadmin')"
+                >
+                  <span>Access Level</span>
+                  <Icon :icon="sortIcon('superadmin')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('superadmin')" />
+                </button>
+              </th>
+              <th class="px-6 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em]">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
+                  @click="toggleSort('status')"
+                >
+                  <span>Status</span>
+                  <Icon :icon="sortIcon('status')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('status')" />
+                </button>
+              </th>
+              <th class="px-7 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em] text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50">
@@ -77,7 +125,7 @@
                   <button 
                     v-if="canManage(admin)"
                     @click="openPermissionModal(admin)"
-                    class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                    class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"
                     title="Edit Permissions"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
@@ -85,7 +133,7 @@
                   <button 
                     v-if="canManage(admin)"
                     @click="toggleStatus(admin)"
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
                     :title="admin.status === 'ACTIVE' ? 'Suspend Access' : 'Restore Access'"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" /></svg>
@@ -95,6 +143,18 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination Section -->
+        <div>
+          <VPagination 
+            v-model:currentPage="pagination.page"
+            v-model:pageSize="pagination.pageSize"
+            :total-pages="pagination.totalPages"
+            :total-elements="pagination.totalElements"
+            :page-size-options="[10, 20, 50, 100]"
+            @change="fetchAdmins"
+          />
+        </div>
       </div>
     </VCard>
 
@@ -238,15 +298,29 @@
             <VButton variant="primary" :loading="submitting" @click="handleUpdatePermissions">Secure Access</VButton>
         </template>
     </VModal>
+
+    <VConfirmDialog
+      v-model="showConfirmDialog"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirm-text="confirmState.confirmText"
+      :variant="confirmState.variant"
+      :loading="submitting"
+      @confirm="runConfirmedAction"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue'
+import { ref, onMounted, reactive, computed, watch } from 'vue'
+import { Icon } from '@iconify/vue'
 import VCard from '@/components/ui/VCard.vue'
 import VButton from '@/components/ui/VButton.vue'
+import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import VModal from '@/components/ui/VModal.vue'
 import VInput from '@/components/ui/VInput.vue'
+import VPagination from '@/components/ui/VPagination.vue'
+import VSelect from '@/components/ui/VSelect.vue'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import adminApi from '@/api/adminApi'
 
@@ -255,10 +329,41 @@ const admins = ref<any[]>([])
 const loading = ref(true)
 const submitting = ref(false)
 
+// Search & Pagination state
+const filters = reactive({
+    search: '',
+    status: null as string | null
+})
+
+const pagination = reactive({
+    page: 1,
+    pageSize: 10,
+    totalElements: 0,
+    totalPages: 0
+})
+
+const sortState = reactive({
+    field: 'fullName',
+    direction: 'asc' as 'asc' | 'desc'
+})
+
+const statusOptions = [
+    { label: 'Active Only', value: 'ACTIVE' },
+    { label: 'Inactive Only', value: 'INACTIVE' }
+]
+
 // Modals state
 const showInviteModal = ref(false)
 const showPermissionModal = ref(false)
+const showConfirmDialog = ref(false)
 const selectedAdmin = ref<any>(null)
+const confirmState = reactive({
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'warning' as 'info' | 'warning' | 'danger' | 'success',
+    action: null as null | (() => Promise<void>)
+})
 
 // Search states
 const inviteGroupSearch = ref('')
@@ -269,6 +374,14 @@ const matrixPermSearch = ref('')
 // Data for Matrix
 const availableGroups = ref<any[]>([])
 const availablePermissions = ref<any[]>([])
+
+const unwrapApiData = <T>(payload: T | { data?: T } | null | undefined, fallback: T): T => {
+    if (payload && typeof payload === 'object' && 'data' in payload) {
+        return (payload.data as T) ?? fallback
+    }
+
+    return (payload as T) ?? fallback
+}
 
 // Forms
 const inviteForm = reactive({
@@ -288,14 +401,47 @@ const matrix = reactive({
 const fetchAdmins = async () => {
   loading.value = true
   try {
-    const { data } = await adminApi.get('/admin/system/admins')
-    admins.value = data
+    const params: any = {
+        page: pagination.page - 1, // backend is 0-indexed
+        size: pagination.pageSize,
+        sort: `${sortState.field},${sortState.direction}`
+    }
+    if (filters.search) params.search = filters.search
+    if (filters.status) params.status = filters.status
+
+    const { data: body } = await adminApi.get('/admin/system/admins', { params })
+    
+    // Resilient mapping: handles both ApiResponse wrapper and raw PageResponse
+    const pageData = body.success !== undefined ? body.data : body
+    
+    if (pageData) {
+      admins.value = pageData.items || []
+      pagination.totalElements = pageData.totalElements || 0
+      pagination.totalPages = pageData.totalPages || 0
+    }
   } catch (err) {
     console.error('Failed to fetch admins', err)
+    admins.value = []
   } finally {
     loading.value = false
   }
 }
+
+// Debounced search logic
+let searchTimeout: any = null
+watch(() => [filters.search, filters.status], () => {
+    if (searchTimeout) clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+        pagination.page = 1 // Reset to first page on filter change
+        fetchAdmins()
+    }, 400)
+})
+
+watch(() => pagination.pageSize, (newSize, oldSize) => {
+    if (newSize === oldSize) return
+    pagination.page = 1
+    fetchAdmins()
+})
 
 const fetchPermissionData = async () => {
     try {
@@ -303,11 +449,34 @@ const fetchPermissionData = async () => {
             adminApi.get('/admin/system/permission-groups'),
             adminApi.get('/admin/system/permissions')
         ])
-        availableGroups.value = groupsRes.data
-        availablePermissions.value = permsRes.data
+        availableGroups.value = unwrapApiData(groupsRes.data, [])
+        availablePermissions.value = unwrapApiData(permsRes.data, [])
     } catch (err) {
         console.error('Failed to load permission catalog', err)
+        availableGroups.value = []
+        availablePermissions.value = []
     }
+}
+
+const toggleSort = (field: 'fullName' | 'superadmin' | 'status') => {
+    if (sortState.field === field) {
+        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc'
+    } else {
+        sortState.field = field
+        sortState.direction = 'asc'
+    }
+
+    pagination.page = 1
+    fetchAdmins()
+}
+
+const sortIcon = (field: 'fullName' | 'superadmin' | 'status') => {
+    if (sortState.field !== field) return 'ph:arrows-down-up-bold'
+    return sortState.direction === 'asc' ? 'ph:sort-ascending-bold' : 'ph:sort-descending-bold'
+}
+
+const sortIconClass = (field: 'fullName' | 'superadmin' | 'status') => {
+    return sortState.field === field ? 'text-emerald-600' : 'text-slate-300'
 }
 
 const filteredInviteGroups = computed(() => {
@@ -362,20 +531,28 @@ const toggleInvitePerm = (id: number) => {
 
 const handleInvite = async () => {
     if (!inviteForm.username || !inviteForm.email || !inviteForm.password) return
-    submitting.value = true
-    try {
-        await adminApi.post('/admin/system/admins', {
-            ...inviteForm,
-            groupIds: Array.from(inviteForm.groupIds),
-            individualPermissionIds: Array.from(inviteForm.individualPermissionIds)
-        })
-        showInviteModal.value = false
-        await fetchAdmins()
-    } catch (err) {
-        console.error('Failed to invite officer', err)
-    } finally {
-        submitting.value = false
+    confirmState.title = 'Confirm Officer Invite'
+    confirmState.message = `Create admin access for "${inviteForm.username}" and assign the selected permission bundle now?`
+    confirmState.confirmText = 'Create Admin'
+    confirmState.variant = 'success'
+    confirmState.action = async () => {
+        submitting.value = true
+        try {
+            await adminApi.post('/admin/system/admins', {
+                ...inviteForm,
+                groupIds: Array.from(inviteForm.groupIds),
+                individualPermissionIds: Array.from(inviteForm.individualPermissionIds)
+            })
+            showInviteModal.value = false
+            showConfirmDialog.value = false
+            await fetchAdmins()
+        } catch (err) {
+            console.error('Failed to invite officer', err)
+        } finally {
+            submitting.value = false
+        }
     }
+    showConfirmDialog.value = true
 }
 
 const openPermissionModal = (admin: any) => {
@@ -399,19 +576,27 @@ const togglePerm = (id: number) => {
 
 const handleUpdatePermissions = async () => {
     if (!selectedAdmin.value) return
-    submitting.value = true
-    try {
-        await adminApi.put(`/admin/system/admins/${selectedAdmin.value.id}/permissions`, {
-            groupIds: Array.from(matrix.groupIds),
-            individualPermissionIds: Array.from(matrix.individualPermissionIds)
-        })
-        showPermissionModal.value = false
-        await fetchAdmins()
-    } catch (err) {
-        console.error('Failed to update permissions', err)
-    } finally {
-        submitting.value = false
+    confirmState.title = 'Apply Permission Changes'
+    confirmState.message = `Update the access matrix for "${selectedAdmin.value.fullName}" with the current group and individual permissions?`
+    confirmState.confirmText = 'Apply Changes'
+    confirmState.variant = 'info'
+    confirmState.action = async () => {
+        submitting.value = true
+        try {
+            await adminApi.put(`/admin/system/admins/${selectedAdmin.value.id}/permissions`, {
+                groupIds: Array.from(matrix.groupIds),
+                individualPermissionIds: Array.from(matrix.individualPermissionIds)
+            })
+            showPermissionModal.value = false
+            showConfirmDialog.value = false
+            await fetchAdmins()
+        } catch (err) {
+            console.error('Failed to update permissions', err)
+        } finally {
+            submitting.value = false
+        }
     }
+    showConfirmDialog.value = true
 }
 
 const canManage = (targetAdmin: any) => {
@@ -425,12 +610,29 @@ const canManage = (targetAdmin: any) => {
 
 const toggleStatus = async (admin: any) => {
   const newStatus = admin.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-  try {
-    await adminApi.patch(`/admin/system/admins/${admin.id}/status?status=${newStatus}`)
-    admin.status = newStatus
-  } catch (err) {
-    console.error('Failed to update admin status', err)
+  confirmState.title = newStatus === 'INACTIVE' ? 'Suspend Admin Access' : 'Restore Admin Access'
+  confirmState.message = newStatus === 'INACTIVE'
+    ? `Suspend "${admin.fullName}"? Their admin access will be blocked until restored.`
+    : `Restore "${admin.fullName}" so they can access the admin portal again?`
+  confirmState.confirmText = newStatus === 'INACTIVE' ? 'Suspend Access' : 'Restore Access'
+  confirmState.variant = newStatus === 'INACTIVE' ? 'danger' : 'success'
+  confirmState.action = async () => {
+    submitting.value = true
+    try {
+      await adminApi.patch(`/admin/system/admins/${admin.id}/status?status=${newStatus}`)
+      admin.status = newStatus
+      showConfirmDialog.value = false
+    } catch (err) {
+      console.error('Failed to update admin status', err)
+    } finally {
+      submitting.value = false
+    }
   }
+  showConfirmDialog.value = true
+}
+
+const runConfirmedAction = async () => {
+    await confirmState.action?.()
 }
 
 onMounted(() => {
