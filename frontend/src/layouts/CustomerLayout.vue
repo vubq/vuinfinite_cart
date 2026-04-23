@@ -29,7 +29,7 @@ const customerAuth = useCustomerAuthStore()
             <div class="flex items-center gap-6">
               <router-link to="/profile" class="flex flex-col items-end group">
                 <span class="text-sm font-black text-slate-800 group-hover:text-emerald-600 transition-colors">{{ customerAuth.user?.name }}</span>
-                <button @click.prevent="customerAuth.logout" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Logout</button>
+                <button @click.prevent.stop="customerAuth.logout()" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Logout</button>
               </router-link>
               <router-link to="/profile" class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-emerald-700 font-black overflow-hidden border border-slate-100 hover:border-emerald-200 transition-all">
                 <img v-if="customerAuth.user?.avatarUrl" :src="customerAuth.user.avatarUrl" class="w-full h-full object-cover" />

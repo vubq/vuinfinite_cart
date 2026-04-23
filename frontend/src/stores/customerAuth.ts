@@ -64,10 +64,18 @@ export const useCustomerAuthStore = defineStore('customerAuth', () => {
     }
   }
 
-  function logout() {
-    token.value = null
-    user.value = null
-    customerApi.post('/auth/customer/logout').catch(() => {})
+  async function logout() {
+    try {
+      if (token.value) {
+        await customerApi.post('/auth/customer/logout')
+      }
+    } catch (e) {
+      // Ignore
+    } finally {
+      token.value = null
+      user.value = null
+      import('@/router').then(m => m.default.push('/login'))
+    }
   }
 
   return {
