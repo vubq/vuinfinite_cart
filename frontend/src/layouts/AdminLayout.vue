@@ -73,11 +73,17 @@ const pageHeader = computed(() => {
 
       <div class="border-t border-slate-100 p-6 bg-white shrink-0 mt-auto">
         <div class="flex items-center gap-3 px-1">
-          <div class="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-[11px] font-bold text-white tracking-widest shadow-sm">
-            {{ adminAuth.user?.username?.substring(0, 2).toUpperCase() || 'AD' }}
-          </div>
+          <router-link to="/admin/profile" class="relative group/avatar">
+            <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-[11px] font-bold text-white tracking-widest shadow-sm overflow-hidden border-2 border-transparent group-hover/avatar:border-emerald-500 transition-all">
+              <img v-if="adminAuth.user?.avatarUrl" :src="adminAuth.user.avatarUrl" class="w-full h-full object-cover" />
+              <span v-else>{{ adminAuth.user?.username?.substring(0, 2).toUpperCase() || 'AD' }}</span>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-lg border-2 border-white flex items-center justify-center text-[8px] text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+          </router-link>
           <div class="flex-grow overflow-hidden">
-            <p class="text-[13px] font-bold text-slate-900 truncate">{{ adminAuth.user?.username }}</p>
+            <router-link to="/admin/profile" class="text-[13px] font-bold text-slate-900 truncate block hover:text-emerald-600 transition-colors">{{ adminAuth.user?.fullName || adminAuth.user?.username }}</router-link>
             <button @click="adminAuth.logout" class="text-[11px] font-medium text-slate-500 hover:text-emerald-600 transition-colors">Sign Out securely</button>
           </div>
         </div>

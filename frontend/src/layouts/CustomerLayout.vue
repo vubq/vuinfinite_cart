@@ -27,13 +27,14 @@ const customerAuth = useCustomerAuthStore()
           
           <template v-if="customerAuth.isAuthenticated">
             <div class="flex items-center gap-6">
-              <div class="flex flex-col items-end">
-                <span class="text-sm font-black text-slate-800">{{ customerAuth.user?.name }}</span>
-                <button @click="customerAuth.logout" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Logout</button>
-              </div>
-              <div class="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black">
-                {{ customerAuth.user?.name?.substring(0, 1) }}
-              </div>
+              <router-link to="/profile" class="flex flex-col items-end group">
+                <span class="text-sm font-black text-slate-800 group-hover:text-emerald-600 transition-colors">{{ customerAuth.user?.name }}</span>
+                <button @click.prevent="customerAuth.logout" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">Logout</button>
+              </router-link>
+              <router-link to="/profile" class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-emerald-700 font-black overflow-hidden border border-slate-100 hover:border-emerald-200 transition-all">
+                <img v-if="customerAuth.user?.avatarUrl" :src="customerAuth.user.avatarUrl" class="w-full h-full object-cover" />
+                <span v-else>{{ customerAuth.user?.name?.substring(0, 1) }}</span>
+              </router-link>
             </div>
           </template>
           <template v-else>

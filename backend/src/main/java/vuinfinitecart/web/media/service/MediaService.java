@@ -80,6 +80,59 @@ public class MediaService {
         return results;
     }
 
+    @SuppressWarnings("unchecked")
+    public Map uploadProfileAvatar(MultipartFile file, String folder) {
+        try {
+            String folderPath = normalizePath(folder);
+            String randomName = java.util.UUID.randomUUID().toString();
+            String publicId = folderPath.isEmpty() ? randomName : folderPath + "/" + randomName;
+
+            Map params = ObjectUtils.asMap(
+                    "public_id", publicId,
+                    "type", "upload",
+                    "resource_type", "image"
+            );
+            return cloudinary.uploader().upload(file.getBytes(), params);
+        } catch (IOException e) {
+            throw AppException.internalError("Avatar upload failed: " + e.getMessage());
+        }
+    }
+
+    public void deleteImageByUrl(String url) {
+        if (url == null || url.isEmpty() || !url.contains("cloudinary.com")) return;
+        try {
+            // Extract public_id from Cloudinary URL
+            // Format: https://res.cloudinary.com/[cloud_name]/image/upload/v[version]/[public_id].[ext]
+            String[] parts = url.split("/");
+            String lastPart = parts[parts.length - 1];
+            String publicIdWithExt = "";
+            
+            // Find where "upload" or "private" or "authenticated" is to get the path after it
+            int startIndex = -1;
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("upload") || parts[i].equals("private") || parts[i].equals("authenticated")) {
+                    startIndex = i + 2; // Skip "upload" and "v123456"
+                    break;
+                }
+            }
+            
+            if (startIndex != -1) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = startIndex; i < parts.length; i++) {
+                    if (i > startIndex) sb.append("/");
+                    sb.append(parts[i]);
+                }
+                String fullPathWithExt = sb.toString();
+                String publicId = fullPathWithExt.substring(0, fullPathWithExt.lastIndexOf('.'));
+                
+                cloudinary.api().deleteResources(List.of(publicId), ObjectUtils.asMap("type", "upload"));
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the whole profile update
+            System.err.println("Failed to delete old avatar: " + e.getMessage());
+        }
+    }
+
     public void createFolder(String path) {
         try {
             cloudinary.api().createFolder(path, ObjectUtils.emptyMap());

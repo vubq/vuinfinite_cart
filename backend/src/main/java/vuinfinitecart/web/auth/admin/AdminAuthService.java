@@ -99,6 +99,7 @@ public class AdminAuthService {
                 .adminId(admin.getId())
                 .username(admin.getUsername())
                 .fullName(admin.getFullName())
+                .avatarUrl(admin.getAvatarUrl())
                 .superadmin(admin.isSuperadmin())
                 .permissions(permissions)
                 .build();

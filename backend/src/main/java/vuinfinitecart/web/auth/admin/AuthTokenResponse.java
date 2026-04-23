@@ -15,6 +15,7 @@ public class AuthTokenResponse {
     private Long adminId;
     private String username;
     private String fullName;
+    private String avatarUrl;
     private boolean superadmin;
     private Set<String> permissions;
 }

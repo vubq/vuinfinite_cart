@@ -92,8 +92,9 @@
             <tr v-for="admin in admins" :key="admin.id" class="hover:bg-slate-50/40 transition-colors group">
               <td class="px-7 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white tracking-widest shadow-sm ring-2 ring-white">
-                    {{ admin.username?.substring(0,2).toUpperCase() }}
+                  <div class="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white tracking-widest shadow-sm ring-2 ring-white overflow-hidden">
+                    <img v-if="admin.avatarUrl" :src="admin.avatarUrl" class="w-full h-full object-cover" />
+                    <span v-else>{{ admin.username?.substring(0,2).toUpperCase() }}</span>
                   </div>
                   <div>
                     <div class="text-[13px] font-bold text-slate-900 leading-none mb-1">{{ admin.fullName }}</div>

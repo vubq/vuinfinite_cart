@@ -28,6 +28,12 @@ const router = createRouter({
           name: 'register',
           component: () => import('@/views/customer/RegisterView.vue'),
           meta: { guestOnly: true }
+        },
+        {
+          path: 'profile',
+          name: 'profile',
+          component: () => import('@/views/customer/ProfileView.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },
@@ -79,6 +85,12 @@ const router = createRouter({
           meta: { requiresAdmin: true }
         },
         {
+          path: 'profile',
+          name: 'admin-profile',
+          component: () => import('@/views/admin/ProfileView.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
           path: 'login',
           name: 'admin-login',
           component: () => import('@/views/admin/LoginView.vue'),
@@ -96,6 +108,11 @@ router.beforeEach((to, _from, next) => {
   // Guard for Admin routes
   if (to.meta.requiresAdmin && !adminAuth.isAuthenticated) {
     return next({ name: 'admin-login' })
+  }
+
+  // Guard for Customer routes
+  if (to.meta.requiresAuth && !customerAuth.isAuthenticated) {
+    return next({ name: 'login' })
   }
 
   // Guard for Guest routes (Login/Register)

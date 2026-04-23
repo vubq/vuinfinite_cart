@@ -163,6 +163,7 @@ public class AdminManagementService {
                 .username(admin.getUsername())
                 .email(admin.getEmail())
                 .fullName(admin.getFullName())
+                .avatarUrl(admin.getAvatarUrl())
                 .superadmin(admin.isSuperadmin())
                 .status(admin.getStatus())
                 .permissions(aggregatePermissions(admin))

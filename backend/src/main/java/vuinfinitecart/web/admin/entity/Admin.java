@@ -34,6 +34,9 @@ public class Admin extends BaseEntity {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     @Column(name = "is_superadmin", nullable = false)
     private boolean superadmin = false;
 

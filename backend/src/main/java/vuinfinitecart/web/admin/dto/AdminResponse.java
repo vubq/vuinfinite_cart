@@ -12,6 +12,7 @@ public class AdminResponse {
     private String username;
     private String email;
     private String fullName;
+    private String avatarUrl;
     private boolean superadmin;
     private Admin.AdminStatus status;
     private Set<String> permissions;

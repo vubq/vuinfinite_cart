@@ -17,4 +17,16 @@ public class SecurityUtils {
     public static Long getCurrentAdminId() {
         return getCurrentAdmin().map(AuthenticatedAdmin::getAdminId).orElse(null);
     }
+
+    public static Optional<AuthenticatedCustomer> getCurrentCustomer() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AuthenticatedCustomer customer) {
+            return Optional.of(customer);
+        }
+        return Optional.empty();
+    }
+
+    public static Long getCurrentCustomerId() {
+        return getCurrentCustomer().map(AuthenticatedCustomer::getCustomerId).orElse(null);
+    }
 }
