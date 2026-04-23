@@ -136,16 +136,81 @@ public class MediaService {
     /**
      * Delete a folder and ALL its contents (files and sub-folders recursively).
      */
-    @SuppressWarnings("unchecked")
     public void deleteFolder(String path, String type) {
         try {
-            // Delete all resources inside recursively
-            deleteResourcesInFolder(path, type);
+            // 1. Delete all resources inside the folder and sub-folders
+            deleteAllResourcesByPrefix(path);
 
-            // Now delete the (empty) folder itself
+            // 2. Recursively delete sub-folders (bottom-up)
+            deleteSubFoldersRecursively(path);
+
+            // 3. Now delete the (empty) folder itself
             cloudinary.api().deleteFolder(path, ObjectUtils.emptyMap());
         } catch (Exception e) {
             throw AppException.internalError("Failed to delete folder: " + e.getMessage());
+        }
+    }
+
+
+    private void deleteAllResourcesByPrefix(String path) {
+        String prefix = path.endsWith("/") ? path : path + "/";
+
+        // Delete all resources in this folder AND subfolders
+        String[] resourceTypes = {"image", "video", "raw"};
+        String[] deliveryTypes = {"upload", "private", "authenticated"};
+        
+        for (String rt : resourceTypes) {
+            for (String dt : deliveryTypes) {
+                try {
+                    boolean more = true;
+                    String nextCursor = null;
+                    while (more) {
+                        Map params = ObjectUtils.asMap("type", dt, "resource_type", rt);
+                        if (nextCursor != null && !nextCursor.isEmpty()) {
+                            params.put("next_cursor", nextCursor);
+                        }
+                        Map result = cloudinary.api().deleteResourcesByPrefix(prefix, params);
+                        nextCursor = (String) result.get("next_cursor");
+                        more = (nextCursor != null && !nextCursor.isEmpty());
+                    }
+                } catch (Exception e) {
+                    // Ignore errors for non-existent types
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteSubFoldersRecursively(String path) {
+        try {
+            boolean moreFolders = true;
+            String nextCursor = null;
+            while (moreFolders) {
+                Map params = ObjectUtils.emptyMap();
+                if (nextCursor != null && !nextCursor.isEmpty()) {
+                    params = ObjectUtils.asMap("next_cursor", nextCursor);
+                }
+                Map subResult = cloudinary.api().subFolders(path, params);
+                List<Map> subFolders = (List<Map>) subResult.get("folders");
+                
+                if (subFolders != null) {
+                    for (Map sub : subFolders) {
+                        String subPath = (String) sub.get("path");
+                        // Recursively delete sub-folders of this sub-folder
+                        deleteSubFoldersRecursively(subPath);
+                        // Then delete this sub-folder itself
+                        try {
+                            cloudinary.api().deleteFolder(subPath, ObjectUtils.emptyMap());
+                        } catch (Exception e) {
+                            // Ignore if already deleted or fails
+                        }
+                    }
+                }
+                nextCursor = (String) subResult.get("next_cursor");
+                moreFolders = (nextCursor != null && !nextCursor.isEmpty());
+            }
+        } catch (Exception e) {
+            // Ignore if subfolders don't exist
         }
     }
 
@@ -190,21 +255,6 @@ public class MediaService {
         } catch (Exception e) {
             // Resource not found → safe to use
             return false;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void deleteResourcesInFolder(String path, String type) throws Exception {
-        // Delete all files directly under this prefix
-        Map result = cloudinary.api().deleteResourcesByPrefix(path, ObjectUtils.asMap("type", type));
-
-        // Recurse into sub-folders
-        Map subResult = cloudinary.api().subFolders(path, ObjectUtils.emptyMap());
-        List<Map> subFolders = (List<Map>) subResult.get("folders");
-        for (Map sub : subFolders) {
-            String subPath = (String) sub.get("path");
-            deleteResourcesInFolder(subPath, type);
-            cloudinary.api().deleteFolder(subPath, ObjectUtils.emptyMap());
         }
     }
 }
