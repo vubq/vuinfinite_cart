@@ -27,6 +27,6 @@ public class I18nTranslation extends BaseEntity {
     @Column(name = "translation_key", nullable = false, length = 500)
     private String key;
 
-    @Column(name = "translation_value", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "translation_value", nullable = true, columnDefinition = "TEXT")
     private String value;
 }

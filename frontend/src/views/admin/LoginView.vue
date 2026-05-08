@@ -2,11 +2,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminAuthStore } from '@/stores/adminAuth'
+import { useI18n } from '@/composables/useI18n'
 import VInput from '@/components/ui/VInput.vue'
 import VButton from '@/components/ui/VButton.vue'
 
 const router = useRouter()
 const auth = useAdminAuthStore()
+const { t } = useI18n(['admin.login'])
 
 const form = ref({
   username: '',
@@ -26,7 +28,7 @@ async function onSubmit() {
     await auth.login(form.value)
     router.push('/admin')
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Admin login failed'
+    error.value = err.response?.data?.message || t('error.failed')
   }
 }
 </script>
@@ -45,7 +47,7 @@ async function onSubmit() {
            Vu<span class="text-slate-800">Emporium</span>
         </h1>
         <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded-full text-[10px] font-bold uppercase tracking-widest animate-in fade-in duration-1000 delay-300">
-          Intelligence Portal
+          {{ t('badge.portal') }}
         </div>
       </div>
 
@@ -59,15 +61,15 @@ async function onSubmit() {
           <div class="space-y-6">
             <VInput
               v-model="form.username"
-              label="Administrative Identity"
-              placeholder="e.g. master.intel"
+              :label="t('input.label_username')"
+              :placeholder="t('input.ph_username')"
               id="admin-user"
               class="modern-input"
             />
             
             <VInput
               v-model="form.password"
-              label="Access Cipher"
+              :label="t('input.label_password')"
               type="password"
               placeholder="••••••••"
               id="admin-pass"
@@ -81,13 +83,13 @@ async function onSubmit() {
             variant="primary"
             class="w-full h-14 text-sm font-black uppercase tracking-[0.15em]"
           >
-            Authenticate Access
+            {{ t('btn.submit') }}
           </VButton>
         </form>
 
         <div class="mt-10 text-center pt-8 border-t border-slate-50">
           <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed">
-            Authorized access only. System activity is monitored and managed remotely by Intel.
+            {{ t('text.notice') }}
           </p>
         </div>
       </div>
@@ -95,7 +97,7 @@ async function onSubmit() {
       <div class="mt-10 text-center animate-in fade-in duration-1000 delay-500">
         <router-link to="/" class="text-slate-400 hover:text-emerald-600 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Storefront
+          {{ t('link.storefront') }}
         </router-link>
       </div>
     </div>

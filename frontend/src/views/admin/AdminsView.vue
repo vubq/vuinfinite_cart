@@ -3,8 +3,8 @@
     <!-- Header Section -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Team Governance</h1>
-        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">Manage administrative access and internal security controls.</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ t('header.title') }}</h1>
+        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">{{ t('header.subtitle') }}</p>
       </div>
       <VButton 
         v-if="adminAuth.user?.superadmin" 
@@ -13,7 +13,7 @@
         class="shadow-emerald-200/50 shadow-lg"
         @click="openInviteModal"
       >
-        Invite Officer
+        {{ t('btn.invite') }}
       </VButton>
     </div>
 
@@ -23,7 +23,7 @@
             <input 
                 v-model="filters.search" 
                 type="text" 
-                placeholder="Search by name, email or username..." 
+                :placeholder="t('search.placeholder')" 
                 class="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all placeholder:text-slate-400"
             />
             <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -32,7 +32,7 @@
             <VSelect
                 v-model="filters.status"
                 :options="statusOptions"
-                placeholder="All Statuses"
+                :placeholder="t('filter.all_statuses')"
                 size="sm"
             />
         </div>
@@ -47,8 +47,8 @@
       
       <div v-else-if="admins.length === 0" class="p-20 text-center">
         <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-        <h3 class="text-lg font-bold text-slate-800">No officers found</h3>
-        <p class="text-[13px] text-slate-500 mt-1">Contact the root superadmin to register base personnel.</p>
+        <h3 class="text-lg font-bold text-slate-800">{{ t('empty.title') }}</h3>
+        <p class="text-[13px] text-slate-500 mt-1">{{ t('empty.subtitle') }}</p>
       </div>
 
       <div v-else class="overflow-x-auto">
@@ -61,7 +61,7 @@
                   class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
                   @click="toggleSort('fullName')"
                 >
-                  <span>Officer</span>
+                  <span>{{ t('table.col_officer') }}</span>
                   <Icon :icon="sortIcon('fullName')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('fullName')" />
                 </button>
               </th>
@@ -71,7 +71,7 @@
                   class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
                   @click="toggleSort('superadmin')"
                 >
-                  <span>Access Level</span>
+                  <span>{{ t('table.col_access_level') }}</span>
                   <Icon :icon="sortIcon('superadmin')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('superadmin')" />
                 </button>
               </th>
@@ -81,11 +81,11 @@
                   class="inline-flex items-center gap-2.5 transition-colors hover:text-slate-800"
                   @click="toggleSort('status')"
                 >
-                  <span>Status</span>
+                  <span>{{ t('table.col_status') }}</span>
                   <Icon :icon="sortIcon('status')" class="h-4.5 w-4.5 transition-colors" :class="sortIconClass('status')" />
                 </button>
               </th>
-              <th class="px-7 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em] text-right">Actions</th>
+              <th class="px-7 py-4 text-xs font-extrabold text-slate-500 uppercase tracking-[0.16em] text-right">{{ t('table.col_actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50">
@@ -104,13 +104,13 @@
               </td>
               <td class="px-6 py-4">
                 <span v-if="admin.superadmin" class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10 uppercase tracking-wider">
-                  Superadmin
+                  {{ t('role.superadmin') }}
                 </span>
                 <span v-else class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 uppercase tracking-wider">
-                  Restricted Access
+                  {{ t('role.restricted') }}
                 </span>
                 <div v-if="!admin.superadmin" @click="openPermissionModal(admin)" class="text-[10px] text-emerald-600 mt-1 pl-0.5 font-bold cursor-pointer hover:underline">
-                    {{ admin.permissions?.length || 0 }} total permits • Manage
+                    {{ admin.permissions?.length || 0 }} {{ t('text.total_permits') }} • {{ t('text.manage') }}
                 </div>
               </td>
               <td class="px-6 py-4">
@@ -127,7 +127,7 @@
                     v-if="canManage(admin)"
                     @click="openPermissionModal(admin)"
                     class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"
-                    title="Edit Permissions"
+                    :title="t('action.edit_permissions')"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
                   </button>
@@ -135,7 +135,7 @@
                     v-if="canManage(admin)"
                     @click="toggleStatus(admin)"
                     class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
-                    :title="admin.status === 'ACTIVE' ? 'Suspend Access' : 'Restore Access'"
+                    :title="admin.status === 'ACTIVE' ? t('action.suspend') : t('action.restore')"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" /></svg>
                   </button>
@@ -160,22 +160,22 @@
     </VCard>
 
     <!-- Invite Admin Modal -->
-    <VModal v-model="showInviteModal" title="Invite New Officer" maxWidth="lg">
+    <VModal v-model="showInviteModal" :title="t('modal.invite.title')" maxWidth="lg">
         <form @submit.prevent="handleInvite" class="space-y-5">
             <div class="grid grid-cols-2 gap-4">
-                <VInput v-model="inviteForm.username" label="Username" placeholder="e.g. jdoe" required />
-                <VInput v-model="inviteForm.fullName" label="Full Name" placeholder="e.g. John Doe" required />
+                <VInput v-model="inviteForm.username" :label="t('modal.invite.username')" :placeholder="t('modal.invite.username_ph')" required />
+                <VInput v-model="inviteForm.fullName" :label="t('modal.invite.full_name')" :placeholder="t('modal.invite.full_name_ph')" required />
             </div>
-            <VInput v-model="inviteForm.email" type="email" label="Email Address" placeholder="john@example.com" required />
-            <VInput v-model="inviteForm.password" type="password" label="Temporary Password" placeholder="At least 6 chars" required />
+            <VInput v-model="inviteForm.email" type="email" :label="t('modal.invite.email')" :placeholder="t('modal.invite.email_ph')" required />
+            <VInput v-model="inviteForm.password" type="password" :label="t('modal.invite.password')" :placeholder="t('modal.invite.password_ph')" required />
             
             <div class="space-y-4 max-h-[300px] overflow-y-auto px-1 py-1 custom-scrollbar">
                 <!-- Groups Section -->
                 <section class="space-y-2">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">Departmental Groups</h4>
+                        <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">{{ t('modal.invite.groups_title') }}</h4>
                         <div class="relative w-32">
-                            <input v-model="inviteGroupSearch" type="text" placeholder="Search..." 
+                            <input v-model="inviteGroupSearch" type="text" :placeholder="t('modal.invite.search_ph')" 
                                    class="w-full pl-7 pr-2 py-1 text-[11px] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" />
                             <svg class="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
@@ -193,16 +193,16 @@
                                 <div class="text-[12px] font-bold" :class="inviteForm.groupIds.has(group.id) ? 'text-emerald-900' : 'text-slate-800'">{{ group.name }}</div>
                             </div>
                         </div>
-                        <div v-if="filteredInviteGroups.length === 0" class="col-span-2 py-4 text-center text-[11px] text-slate-400 italic">No groups matching your search</div>
+                        <div v-if="filteredInviteGroups.length === 0" class="col-span-2 py-4 text-center text-[11px] text-slate-400 italic">{{ t('modal.invite.no_groups') }}</div>
                     </div>
                 </section>
 
                 <!-- Individual Permits Section -->
                 <section class="space-y-2">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">Special Individual Permits</h4>
+                        <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">{{ t('modal.invite.perms_title') }}</h4>
                         <div class="relative w-32">
-                            <input v-model="invitePermSearch" type="text" placeholder="Search..." 
+                            <input v-model="invitePermSearch" type="text" :placeholder="t('modal.invite.search_ph')" 
                                    class="w-full pl-7 pr-2 py-1 text-[11px] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" />
                             <svg class="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
@@ -221,26 +221,26 @@
                                 <div class="text-[10px] font-mono text-slate-400 mt-0.5">{{ perm.key }}</div>
                             </div>
                         </div>
-                        <div v-if="filteredInvitePerms.length === 0" class="col-span-2 py-4 text-center text-[11px] text-slate-400 italic">No permits matching your search</div>
+                        <div v-if="filteredInvitePerms.length === 0" class="col-span-2 py-4 text-center text-[11px] text-slate-400 italic">{{ t('modal.invite.no_perms') }}</div>
                     </div>
                 </section>
             </div>
         </form>
         <template #footer>
-            <VButton variant="secondary" @click="showInviteModal = false">Cancel</VButton>
-            <VButton variant="primary" :loading="submitting" @click="handleInvite">Authorize Access</VButton>
+            <VButton variant="secondary" @click="showInviteModal = false">{{ t('common:btn.cancel') }}</VButton>
+            <VButton variant="primary" :loading="submitting" @click="handleInvite">{{ t('modal.btn.authorize') }}</VButton>
         </template>
     </VModal>
 
     <!-- Permission Matrix Modal -->
-    <VModal v-model="showPermissionModal" :title="`Permissions: ${selectedAdmin?.fullName}`" maxWidth="2xl">
+    <VModal v-model="showPermissionModal" :title="t('modal.matrix.title') + selectedAdmin?.fullName" maxWidth="2xl">
         <div v-if="selectedAdmin" class="space-y-6">
             <!-- Groups Section -->
             <section class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">Departmental Groups</h4>
+                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">{{ t('modal.invite.groups_title') }}</h4>
                     <div class="relative w-40">
-                        <input v-model="matrixGroupSearch" type="text" placeholder="Search groups..." 
+                        <input v-model="matrixGroupSearch" type="text" :placeholder="t('modal.matrix.search_groups')" 
                                class="w-full pl-8 pr-3 py-1.5 text-[12px] border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all" />
                         <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
@@ -260,7 +260,7 @@
                         </div>
                     </div>
                     <div v-if="filteredMatrixGroups.length === 0" class="col-span-2 py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                        <p class="text-sm text-slate-400 font-medium italic">No departmental groups found</p>
+                        <p class="text-sm text-slate-400 font-medium italic">{{ t('modal.matrix.no_groups') }}</p>
                     </div>
                 </div>
             </section>
@@ -268,9 +268,9 @@
             <!-- Individual Permits Section -->
             <section class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">Special Individual Permits</h4>
+                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">{{ t('modal.invite.perms_title') }}</h4>
                     <div class="relative w-40">
-                        <input v-model="matrixPermSearch" type="text" placeholder="Search permits..." 
+                        <input v-model="matrixPermSearch" type="text" :placeholder="t('modal.matrix.search_perms')" 
                                class="w-full pl-8 pr-3 py-1.5 text-[12px] border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all" />
                         <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
@@ -289,14 +289,14 @@
                         <span class="text-[10px] font-mono font-bold text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200 group-hover:text-emerald-500">{{ perm.key }}</span>
                     </div>
                     <div v-if="filteredMatrixPerms.length === 0" class="py-10 text-center">
-                        <p class="text-sm text-slate-400 font-medium italic">No individual permits found</p>
+                        <p class="text-sm text-slate-400 font-medium italic">{{ t('modal.matrix.no_perms') }}</p>
                     </div>
                 </div>
             </section>
         </div>
         <template #footer>
-            <VButton variant="secondary" @click="showPermissionModal = false">Cancel</VButton>
-            <VButton variant="primary" :loading="submitting" @click="handleUpdatePermissions">Secure Access</VButton>
+            <VButton variant="secondary" @click="showPermissionModal = false">{{ t('common:btn.cancel') }}</VButton>
+            <VButton variant="primary" :loading="submitting" @click="handleUpdatePermissions">{{ t('modal.btn.secure_access') }}</VButton>
         </template>
     </VModal>
 
@@ -324,8 +324,10 @@ import VPagination from '@/components/ui/VPagination.vue'
 import VSelect from '@/components/ui/VSelect.vue'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import adminApi from '@/api/adminApi'
+import { useI18n } from '@/composables/useI18n'
 
 const adminAuth = useAdminAuthStore()
+const { t } = useI18n(['admin.admins', 'common'])
 const admins = ref<any[]>([])
 const loading = ref(true)
 const submitting = ref(false)
@@ -348,10 +350,10 @@ const sortState = reactive({
     direction: 'asc' as 'asc' | 'desc'
 })
 
-const statusOptions = [
-    { label: 'Active Only', value: 'ACTIVE' },
-    { label: 'Inactive Only', value: 'INACTIVE' }
-]
+const statusOptions = computed(() => [
+    { label: t('filter.active_only'), value: 'ACTIVE' },
+    { label: t('filter.inactive_only'), value: 'INACTIVE' }
+])
 
 // Modals state
 const showInviteModal = ref(false)
@@ -532,9 +534,9 @@ const toggleInvitePerm = (id: number) => {
 
 const handleInvite = async () => {
     if (!inviteForm.username || !inviteForm.email || !inviteForm.password) return
-    confirmState.title = 'Confirm Officer Invite'
-    confirmState.message = `Create admin access for "${inviteForm.username}" and assign the selected permission bundle now?`
-    confirmState.confirmText = 'Create Admin'
+    confirmState.title = t('confirm.invite.title')
+    confirmState.message = t('confirm.invite.message').replace('{username}', inviteForm.username)
+    confirmState.confirmText = t('confirm.invite.confirm')
     confirmState.variant = 'success'
     confirmState.action = async () => {
         submitting.value = true
@@ -577,9 +579,9 @@ const togglePerm = (id: number) => {
 
 const handleUpdatePermissions = async () => {
     if (!selectedAdmin.value) return
-    confirmState.title = 'Apply Permission Changes'
-    confirmState.message = `Update the access matrix for "${selectedAdmin.value.fullName}" with the current group and individual permissions?`
-    confirmState.confirmText = 'Apply Changes'
+    confirmState.title = t('confirm.matrix.title')
+    confirmState.message = t('confirm.matrix.message').replace('{name}', selectedAdmin.value.fullName)
+    confirmState.confirmText = t('confirm.matrix.confirm')
     confirmState.variant = 'info'
     confirmState.action = async () => {
         submitting.value = true
@@ -611,11 +613,11 @@ const canManage = (targetAdmin: any) => {
 
 const toggleStatus = async (admin: any) => {
   const newStatus = admin.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-  confirmState.title = newStatus === 'INACTIVE' ? 'Suspend Admin Access' : 'Restore Admin Access'
+  confirmState.title = newStatus === 'INACTIVE' ? t('confirm.suspend.title') : t('confirm.restore.title')
   confirmState.message = newStatus === 'INACTIVE'
-    ? `Suspend "${admin.fullName}"? Their admin access will be blocked until restored.`
-    : `Restore "${admin.fullName}" so they can access the admin portal again?`
-  confirmState.confirmText = newStatus === 'INACTIVE' ? 'Suspend Access' : 'Restore Access'
+    ? t('confirm.suspend.message').replace('{name}', admin.fullName)
+    : t('confirm.restore.message').replace('{name}', admin.fullName)
+  confirmState.confirmText = newStatus === 'INACTIVE' ? t('confirm.suspend.confirm') : t('confirm.restore.confirm')
   confirmState.variant = newStatus === 'INACTIVE' ? 'danger' : 'success'
   confirmState.action = async () => {
     submitting.value = true

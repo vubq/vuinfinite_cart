@@ -97,6 +97,12 @@ const router = createRouter({
           meta: { requiresAdmin: true }
         },
         {
+          path: 'i18n',
+          name: 'admin-i18n',
+          component: () => import('@/views/admin/I18nView.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
           path: 'login',
           name: 'admin-login',
           component: () => import('@/views/admin/LoginView.vue'),

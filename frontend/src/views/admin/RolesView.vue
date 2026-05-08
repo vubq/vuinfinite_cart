@@ -3,8 +3,8 @@
     <!-- Header Section -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Access Roles</h1>
-        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">Define reusable departmental permission groups.</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ t('header.title') }}</h1>
+        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">{{ t('header.subtitle') }}</p>
       </div>
       <VButton 
         variant="primary" 
@@ -13,7 +13,7 @@
         @click="openCreateModal"
       >
         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
-        New Role
+        {{ t('btn.new_role') }}
       </VButton>
     </div>
 
@@ -23,7 +23,7 @@
             <input 
                 v-model="filters.search" 
                 type="text" 
-                placeholder="Search roles by name..." 
+                :placeholder="t('search.placeholder')" 
                 class="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all placeholder:text-slate-400"
             />
             <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -36,8 +36,8 @@
     </div>
     
     <div v-else-if="groups.length === 0" class="p-20 text-center bg-white rounded-2xl border border-slate-200/60">
-      <h3 class="text-lg font-bold text-slate-800">No roles defined</h3>
-      <p class="text-[13px] text-slate-500 mt-1">Create your first departmental group to start assigning permissions in bulk.</p>
+      <h3 class="text-lg font-bold text-slate-800">{{ t('empty.title') }}</h3>
+      <p class="text-[13px] text-slate-500 mt-1">{{ t('empty.subtitle') }}</p>
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -49,12 +49,12 @@
 
         <div class="relative">
             <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">{{ group.name }}</h3>
-            <p class="text-[12px] text-slate-500 mt-1 min-h-[32px] leading-relaxed">{{ group.description || 'No description provided.' }}</p>
+            <p class="text-[12px] text-slate-500 mt-1 min-h-[32px] leading-relaxed">{{ group.description || t('card.no_description') }}</p>
             
             <div class="mt-5 flex items-center justify-between">
                 <div class="flex items-center gap-1.5">
                     <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                        {{ group.permissions?.length || 0 }} Permits
+                        {{ group.permissions?.length || 0 }} {{ t('card.permits') }}
                     </span>
                 </div>
                 <div class="flex items-center gap-1">
@@ -71,23 +71,23 @@
     </div>
 
     <!-- Role Modal -->
-    <VModal v-model="showModal" :title="isEditing ? 'Update Role' : 'Define New Role'" maxWidth="2xl">
+    <VModal v-model="showModal" :title="isEditing ? t('modal.title.update') : t('modal.title.create')" maxWidth="2xl">
         <form @submit.prevent="handleSubmit" class="space-y-6">
             <div class="space-y-4">
-                <VInput v-model="form.name" label="Role Name" placeholder="e.g. Content Manager" required />
+                <VInput v-model="form.name" :label="t('modal.label.role_name')" :placeholder="t('modal.ph.role_name')" required />
                 <div class="space-y-1.5">
-                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <label class="block text-sm font-medium text-gray-700">{{ t('modal.label.description') }}</label>
                     <textarea v-model="form.description" rows="2" 
                               class="block w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder-gray-400"
-                              placeholder="Describe the scope of this role..."></textarea>
+                              :placeholder="t('modal.ph.description')"></textarea>
                 </div>
             </div>
 
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">Granted Permissions</h4>
+                    <h4 class="text-[12px] font-extrabold uppercase tracking-widest text-slate-400">{{ t('modal.section.granted') }}</h4>
                     <div class="relative w-40">
-                        <input v-model="permSearch" type="text" placeholder="Search permits..." 
+                        <input v-model="permSearch" type="text" :placeholder="t('modal.ph.search_permits')" 
                                class="w-full pl-8 pr-3 py-1.5 text-[12px] border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all" />
                         <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
@@ -107,15 +107,15 @@
                         </div>
                     </div>
                     <div v-if="filteredPermissions.length === 0" class="col-span-2 py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                        <p class="text-sm text-slate-400 font-medium italic">No matching permissions found</p>
+                        <p class="text-sm text-slate-400 font-medium italic">{{ t('modal.empty.no_permits') }}</p>
                     </div>
                 </div>
             </div>
         </form>
         <template #footer>
-            <VButton variant="secondary" @click="showModal = false">Cancel</VButton>
+            <VButton variant="secondary" @click="showModal = false">{{ t('common:btn.cancel') }}</VButton>
             <VButton variant="primary" :loading="submitting" @click="handleSubmit">
-                {{ isEditing ? 'Save Changes' : 'Confirm & Create' }}
+                {{ isEditing ? t('modal.btn.save') : t('modal.btn.create') }}
             </VButton>
         </template>
     </VModal>
@@ -139,7 +139,9 @@ import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import VModal from '@/components/ui/VModal.vue'
 import VInput from '@/components/ui/VInput.vue'
 import adminApi from '@/api/adminApi'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n(['admin.roles', 'common'])
 const groups = ref<any[]>([])
 const availablePermissions = ref<any[]>([])
 const loading = ref(true)
@@ -245,11 +247,11 @@ const togglePerm = (id: number) => {
 
 const handleSubmit = async () => {
     if (!form.name) return
-    confirmState.title = isEditing.value ? 'Confirm Role Update' : 'Create New Role'
+    confirmState.title = isEditing.value ? t('confirm.update.title') : t('confirm.create.title')
     confirmState.message = isEditing.value
-        ? `Save changes to "${form.name}" and update its permission mapping?`
-        : `Create the role "${form.name}" with the selected permissions?`
-    confirmState.confirmText = isEditing.value ? 'Save Changes' : 'Create Role'
+        ? t('confirm.update.message').replace('{name}', form.name)
+        : t('confirm.create.message').replace('{name}', form.name)
+    confirmState.confirmText = isEditing.value ? t('confirm.btn.save') : t('confirm.btn.create')
     confirmState.variant = isEditing.value ? 'info' : 'success'
     confirmState.action = async () => {
         submitting.value = true
@@ -278,9 +280,9 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (group: any) => {
-    confirmState.title = 'Delete Role'
-    confirmState.message = `Delete "${group.name}"? All admins assigned to this role will lose those permissions immediately.`
-    confirmState.confirmText = 'Delete Role'
+    confirmState.title = t('confirm.delete.title')
+    confirmState.message = t('confirm.delete.message').replace('{name}', group.name)
+    confirmState.confirmText = t('confirm.btn.delete')
     confirmState.variant = 'danger'
     confirmState.action = async () => {
         submitting.value = true

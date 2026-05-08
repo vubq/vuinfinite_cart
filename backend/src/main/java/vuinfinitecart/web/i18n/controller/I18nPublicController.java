@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vuinfinitecart.web.common.response.ApiResponse;
+import vuinfinitecart.web.i18n.entity.I18nLanguage;
+import vuinfinitecart.web.i18n.service.I18nLanguageService;
 import vuinfinitecart.web.i18n.service.I18nService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,6 +20,12 @@ import java.util.Map;
 public class I18nPublicController {
 
     private final I18nService i18nService;
+    private final I18nLanguageService languageService;
+
+    @GetMapping("/languages")
+    public ApiResponse<List<I18nLanguage>> getLanguages() {
+        return ApiResponse.ok(languageService.getActiveLanguages());
+    }
 
     @GetMapping("/{locale}/{namespace}")
     public ResponseEntity<ApiResponse<Map<String, String>>> getTranslations(

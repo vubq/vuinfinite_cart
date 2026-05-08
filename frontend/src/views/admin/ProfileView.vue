@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="flex items-end justify-between px-2">
       <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Profile</h1>
-        <p class="text-[13px] text-slate-500 mt-1.5 font-medium italic">Manage your internal identity and security settings.</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ t('header.title') }}</h1>
+        <p class="text-[13px] text-slate-500 mt-1.5 font-medium italic">{{ t('header.subtitle') }}</p>
       </div>
       <div class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">
-        Security Level: {{ authStore.user?.superadmin ? 'Superadmin' : 'Standard' }}
+        {{ t('header.security_level') }}{{ authStore.user?.superadmin ? t('role.superadmin') : t('role.standard') }}
       </div>
     </div>
 
@@ -33,10 +33,9 @@
                 </div>
               </div>
 
-              <!-- Uploading Spinner -->
               <div v-if="uploadingAvatar" class="absolute inset-0 rounded-[2.5rem] bg-white/80 flex flex-col items-center justify-center">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-                <p class="text-[10px] font-bold text-emerald-600 mt-2 uppercase">Uploading</p>
+                <p class="text-[10px] font-bold text-emerald-600 mt-2 uppercase">{{ t('avatar.uploading') }}</p>
               </div>
             </div>
 
@@ -51,11 +50,11 @@
 
             <div class="w-full space-y-3">
               <div class="flex items-center justify-between text-xs px-1">
-                <span class="font-bold text-slate-400">Username</span>
+                <span class="font-bold text-slate-400">{{ t('label.username') }}</span>
                 <span class="font-black text-slate-700 italic">@{{ profile.username }}</span>
               </div>
               <div class="flex items-center justify-between text-xs px-1">
-                <span class="font-bold text-slate-400">Account ID</span>
+                <span class="font-bold text-slate-400">{{ t('label.account_id') }}</span>
                 <span class="font-black text-slate-700 italic">#{{ profile.id }}</span>
               </div>
             </div>
@@ -72,8 +71,8 @@
               <Icon icon="ph:fingerprint-bold" class="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Protected Identity</p>
-              <p class="text-xs font-medium text-slate-300 mt-0.5">Your profile is end-to-end encrypted.</p>
+              <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">{{ t('badge.protected_identity') }}</p>
+              <p class="text-xs font-medium text-slate-300 mt-0.5">{{ t('badge.encrypted') }}</p>
             </div>
           </div>
         </div>
@@ -87,18 +86,18 @@
             <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
               <Icon icon="ph:user-bold" class="w-5 h-5 text-slate-600" />
             </div>
-            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Identity Details</h2>
+            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">{{ t('section.identity_details') }}</h2>
           </div>
 
           <form @submit.prevent="handleUpdateInfo" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <VInput v-model="form.fullName" label="Full Name" placeholder="John Doe" icon="ph:user" required />
-              <VInput v-model="form.email" label="Email Address" type="email" placeholder="admin@vue-emporium.com" icon="ph:envelope" required />
+              <VInput v-model="form.fullName" :label="t('label.full_name')" :placeholder="t('placeholder.full_name')" icon="ph:user" required />
+              <VInput v-model="form.email" :label="t('label.email_address')" type="email" :placeholder="t('placeholder.email_address')" icon="ph:envelope" required />
             </div>
 
             <div class="flex justify-end pt-2">
               <VButton type="submit" variant="primary" :loading="updatingInfo" class="!px-8 shadow-lg shadow-emerald-200/50">
-                Save Changes
+                {{ t('btn.save_changes') }}
               </VButton>
             </div>
           </form>
@@ -110,21 +109,21 @@
             <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
               <Icon icon="ph:lock-key-bold" class="w-5 h-5 text-slate-600" />
             </div>
-            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Security Credentials</h2>
+            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">{{ t('section.security_credentials') }}</h2>
           </div>
 
           <form @submit.prevent="handleUpdatePassword" class="space-y-6">
             <div class="grid grid-cols-1 gap-6">
-              <VInput v-model="passForm.currentPassword" label="Current Access Password" type="password" placeholder="••••••••" icon="ph:key-bold" required />
+              <VInput v-model="passForm.currentPassword" :label="t('label.current_access_password')" type="password" placeholder="••••••••" icon="ph:key-bold" required />
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <VInput v-model="passForm.newPassword" label="New Password" type="password" placeholder="••••••••" icon="ph:lock-simple-bold" required />
-                <VInput v-model="passForm.confirmPassword" label="Confirm New Password" type="password" placeholder="••••••••" icon="ph:lock-simple-bold" required />
+                <VInput v-model="passForm.newPassword" :label="t('label.new_password')" type="password" placeholder="••••••••" icon="ph:lock-simple-bold" required />
+                <VInput v-model="passForm.confirmPassword" :label="t('label.confirm_new_password')" type="password" placeholder="••••••••" icon="ph:lock-simple-bold" required />
               </div>
             </div>
 
             <div class="flex justify-end pt-2">
               <VButton type="submit" variant="secondary" :loading="updatingPass" class="!px-8 !border-slate-200 !text-slate-700 hover:!bg-slate-50">
-                Update Security
+                {{ t('btn.update_security') }}
               </VButton>
             </div>
           </form>
@@ -141,8 +140,10 @@ import { useAdminAuthStore } from '@/stores/adminAuth'
 import adminApi from '@/api/adminApi'
 import VInput from '@/components/ui/VInput.vue'
 import VButton from '@/components/ui/VButton.vue'
+import { useI18n } from '@/composables/useI18n'
 
 const authStore = useAdminAuthStore()
+const { t } = useI18n(['admin.profile', 'common'])
 const profile = ref<any>({})
 const uploadingAvatar = ref(false)
 const updatingInfo = ref(false)
@@ -191,7 +192,7 @@ const handleUpdateInfo = async () => {
 
 const handleUpdatePassword = async () => {
   if (passForm.newPassword !== passForm.confirmPassword) {
-    alert('New passwords do not match')
+    alert(t('alert.password_mismatch'))
     return
   }
   
@@ -204,9 +205,9 @@ const handleUpdatePassword = async () => {
     passForm.currentPassword = ''
     passForm.newPassword = ''
     passForm.confirmPassword = ''
-    alert('Password updated successfully')
+    alert(t('alert.password_updated'))
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Password update failed')
+    alert(err.response?.data?.message || t('alert.password_update_failed'))
   } finally {
     updatingPass.value = false
   }

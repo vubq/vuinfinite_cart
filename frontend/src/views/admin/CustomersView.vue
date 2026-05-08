@@ -3,11 +3,11 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Client Relations (CRM)</h1>
-        <p class="text-[13px] text-slate-500 mt-1 font-medium">Monitor customer growth and manage account security.</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ t('header.title') }}</h1>
+        <p class="text-[13px] text-slate-500 mt-1 font-medium">{{ t('header.subtitle') }}</p>
       </div>
       <div class="flex gap-3">
-        <VButton variant="secondary" size="md">Export Leads</VButton>
+        <VButton variant="secondary" size="md">{{ t('btn.export') }}</VButton>
       </div>
     </div>
     
@@ -18,18 +18,18 @@
       
       <div v-else-if="customers.length === 0" class="p-20 text-center">
         <svg class="w-12 h-12 text-slate-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-        <h3 class="text-lg font-bold text-slate-800">No customers registered</h3>
-        <p class="text-[13px] text-slate-500 mt-1">Data will populate automatically as clients register on the storefront.</p>
+        <h3 class="text-lg font-bold text-slate-800">{{ t('empty.title') }}</h3>
+        <p class="text-[13px] text-slate-500 mt-1">{{ t('empty.subtitle') }}</p>
       </div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200/60">
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client Identity</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contact</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Protection</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('table.col_identity') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('table.col_contact') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('table.col_status') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">{{ t('table.col_protection') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -42,13 +42,13 @@
                   </div>
                   <div>
                     <div class="text-[13px] font-bold text-slate-900 leading-none mb-1">{{ customer.name }}</div>
-                    <div class="text-[11px] text-slate-400 font-medium italic">Joined {{ formatDate(customer.createdAt) }}</div>
+                    <div class="text-[11px] text-slate-400 font-medium italic">{{ t('text.joined').replace('{date}', formatDate(customer.createdAt)) }}</div>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4">
                 <div class="text-[12px] font-semibold text-slate-700 leading-none mb-1">{{ customer.email }}</div>
-                <div class="text-[11px] text-slate-400 font-medium tracking-tight">{{ customer.phone || 'No phone recorded' }}</div>
+                <div class="text-[11px] text-slate-400 font-medium tracking-tight">{{ customer.phone || t('text.no_phone') }}</div>
               </td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider" 
@@ -65,7 +65,7 @@
                     class="!py-1.5 !px-3 !text-[11px] !bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100"
                     @click="updateStatus(customer, 'BANNED')"
                   >
-                    Restrict Account
+                    {{ t('btn.restrict') }}
                   </VButton>
                   <VButton 
                     v-else
@@ -74,7 +74,7 @@
                     class="!py-1.5 !px-3 !text-[11px] !bg-emerald-50 !text-emerald-600 !border-emerald-100 hover:!bg-emerald-100"
                     @click="updateStatus(customer, 'ACTIVE')"
                   >
-                    Restore Access
+                    {{ t('btn.restore') }}
                   </VButton>
                 </div>
               </td>
@@ -102,7 +102,9 @@ import VCard from '@/components/ui/VCard.vue'
 import VButton from '@/components/ui/VButton.vue'
 import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import adminApi from '@/api/adminApi'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n(['admin.customers'])
 const customers = ref<any[]>([])
 const loading = ref(true)
 const submitting = ref(false)
@@ -129,11 +131,11 @@ const fetchCustomers = async () => {
 
 const updateStatus = async (customer: any, newStatus: string) => {
   confirmState.value = {
-    title: newStatus === 'BANNED' ? 'Restrict Customer Account' : 'Restore Customer Account',
+    title: newStatus === 'BANNED' ? t('confirm.restrict.title') : t('confirm.restore.title'),
     message: newStatus === 'BANNED'
-      ? `Restrict "${customer.name}" now? Their refresh access will be revoked immediately.`
-      : `Restore "${customer.name}" so they can access their account again?`,
-    confirmText: newStatus === 'BANNED' ? 'Restrict Account' : 'Restore Access',
+      ? t('confirm.restrict.message').replace('{name}', customer.name)
+      : t('confirm.restore.message').replace('{name}', customer.name),
+    confirmText: newStatus === 'BANNED' ? t('confirm.restrict.confirm') : t('confirm.restore.confirm'),
     variant: newStatus === 'BANNED' ? 'danger' : 'success',
     action: async () => {
       submitting.value = true
@@ -164,7 +166,7 @@ const statusClass = (status: string) => {
 }
 
 const formatDate = (dateStr: string) => {
-  if (!dateStr) return 'Unknown'
+  if (!dateStr) return t('text.unknown')
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 

@@ -3,24 +3,24 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Media Explorer</h1>
-        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">Manage your Cloudinary assets with ease.</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ t('header.title') }}</h1>
+        <p class="text-[13px] text-slate-500 mt-1 font-medium italic">{{ t('header.subtitle') }}</p>
       </div>
       <div class="flex gap-3">
         <!-- Selection action bar -->
         <template v-if="selectedFiles.length > 0">
-          <span class="self-center text-sm font-bold text-slate-500">{{ selectedFiles.length }} selected</span>
-          <VButton variant="secondary" size="md" @click="clearSelection">Deselect All</VButton>
+          <span class="self-center text-sm font-bold text-slate-500">{{ selectedFiles.length }} {{ t('text.selected') }}</span>
+          <VButton variant="secondary" size="md" @click="clearSelection">{{ t('btn.deselect_all') }}</VButton>
           <VButton variant="secondary" size="md" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100" @click="confirmBulkDelete">
-            Delete ({{ selectedFiles.length }})
+            {{ t('context.delete') }} ({{ selectedFiles.length }})
           </VButton>
         </template>
         <template v-else>
           <VButton variant="secondary" size="md" @click="showFolderModal = true">
-             New Folder
+             {{ t('btn.new_folder') }}
           </VButton>
           <VButton variant="primary" size="md" class="shadow-emerald-200/50 shadow-lg" @click="triggerUpload">
-             Upload Files
+             {{ t('btn.upload_files') }}
           </VButton>
         </template>
         <input type="file" ref="fileInput" class="hidden" multiple @change="handleFileUpload" />
@@ -35,7 +35,7 @@
                 :style="{ width: uploadProgress + '%' }"
             />
         </div>
-        <p class="text-[11px] text-slate-400 font-medium text-right">{{ uploadProgress }}% uploaded</p>
+        <p class="text-[11px] text-slate-400 font-medium text-right">{{ uploadProgress }}% {{ t('text.uploaded') }}</p>
     </div>
 
     <!-- Navigation and Scope -->
@@ -60,7 +60,7 @@
                 class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all"
                 :class="scope === s.value ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             >
-                {{ s.label }}
+                {{ t(s.label) }}
             </button>
         </div>
     </div>
@@ -84,7 +84,7 @@
                 </div>
                 <div class="w-full px-3">
                     <p class="text-[11px] font-bold text-slate-700 text-center truncate">{{ folder }}</p>
-                    <p class="text-[10px] text-slate-400 text-center font-semibold">Folder</p>
+                    <p class="text-[10px] text-slate-400 text-center font-semibold">{{ t('text.folder') }}</p>
                 </div>
             </div>
         </div>
@@ -137,8 +137,8 @@
                 <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-4">
                     <Icon icon="ph:stack" class="w-7 h-7 text-slate-300" />
                 </div>
-                <p class="text-[13px] font-bold text-slate-500">This directory is empty</p>
-                <p class="text-[11px] text-slate-400 mt-1">Upload files or create a new folder to get started</p>
+                <p class="text-[13px] font-bold text-slate-500">{{ t('empty.title') }}</p>
+                <p class="text-[11px] text-slate-400 mt-1">{{ t('empty.subtitle') }}</p>
             </div>
         </div>
     </div>
@@ -167,14 +167,14 @@
                             class="ctx-btn"
                         >
                             <span class="ctx-icon bg-blue-50 text-blue-600"><Icon icon="ph:pencil-simple-bold" class="w-3.5 h-3.5" /></span>
-                            Rename
+                            {{ t('context.rename') }}
                         </button>
                         <button
                             @click="confirmDeleteFolder(contextMenu.target)"
                             class="ctx-btn ctx-btn-danger"
                         >
                             <span class="ctx-icon bg-red-50 text-red-500"><Icon icon="ph:trash-bold" class="w-3.5 h-3.5" /></span>
-                            Delete Folder
+                            {{ t('context.delete_folder') }}
                         </button>
                     </template>
 
@@ -185,7 +185,7 @@
                             class="ctx-btn"
                         >
                             <span class="ctx-icon bg-emerald-50 text-emerald-600"><Icon icon="ph:arrow-square-out-bold" class="w-3.5 h-3.5" /></span>
-                            Open in new tab
+                            {{ t('context.open_in_tab') }}
                         </button>
                         <button
                             @click="toggleSelect(contextMenu.target.public_id); closeContextMenu()"
@@ -194,14 +194,14 @@
                             <span class="ctx-icon bg-slate-100 text-slate-500">
                                 <Icon :icon="isSelected(contextMenu.target.public_id) ? 'ph:check-square-bold' : 'ph:square-bold'" class="w-3.5 h-3.5" />
                             </span>
-                            {{ isSelected(contextMenu.target.public_id) ? 'Deselect' : 'Select' }}
+                            {{ isSelected(contextMenu.target.public_id) ? t('context.deselect') : t('context.select') }}
                         </button>
                         <button
                             @click="selectAll(); closeContextMenu()"
                             class="ctx-btn"
                         >
                             <span class="ctx-icon bg-slate-100 text-slate-500"><Icon icon="ph:check-square-offset-bold" class="w-3.5 h-3.5" /></span>
-                            Select All ({{ files.length }})
+                            {{ t('context.select_all') }} ({{ files.length }})
                         </button>
                         <div class="my-1 mx-3 border-t border-slate-100" />
                         <button
@@ -209,14 +209,14 @@
                             class="ctx-btn"
                         >
                             <span class="ctx-icon bg-blue-50 text-blue-600"><Icon icon="ph:pencil-simple-bold" class="w-3.5 h-3.5" /></span>
-                            Rename
+                            {{ t('context.rename') }}
                         </button>
                         <button
                             @click="confirmDelete(contextMenu.target)"
                             class="ctx-btn ctx-btn-danger"
                         >
                             <span class="ctx-icon bg-red-50 text-red-500"><Icon icon="ph:trash-bold" class="w-3.5 h-3.5" /></span>
-                            Delete
+                            {{ t('context.delete') }}
                         </button>
                     </template>
                 </div>
@@ -227,40 +227,40 @@
     <!-- ─── Modals ─────────────────────────────────────────────── -->
 
     <!-- Create Folder Modal -->
-    <VModal v-model="showFolderModal" title="New Folder" maxWidth="sm">
-        <VInput v-model="newFolderName" label="Folder Name" placeholder="e.g. avatars" required />
+    <VModal v-model="showFolderModal" :title="t('modal.new_folder.title')" maxWidth="sm">
+        <VInput v-model="newFolderName" :label="t('modal.new_folder.label')" :placeholder="t('modal.new_folder.placeholder')" required />
         <template #footer>
-            <VButton variant="secondary" @click="showFolderModal = false">Cancel</VButton>
-            <VButton variant="primary" :loading="submitting" @click="handleCreateFolder">Create</VButton>
+            <VButton variant="secondary" @click="showFolderModal = false">{{ t('common:btn.cancel') }}</VButton>
+            <VButton variant="primary" :loading="submitting" @click="handleCreateFolder">{{ t('modal.btn.create') }}</VButton>
         </template>
     </VModal>
 
     <!-- Rename File Modal -->
-    <VModal v-model="showRenameModal" title="Rename File" maxWidth="sm">
-        <VInput v-model="newName" label="New Name" placeholder="e.g. hero-banner" required />
+    <VModal v-model="showRenameModal" :title="t('modal.rename_file.title')" maxWidth="sm">
+        <VInput v-model="newName" :label="t('modal.rename_file.label')" :placeholder="t('modal.rename_file.placeholder')" required />
         <template #footer>
-            <VButton variant="secondary" @click="showRenameModal = false">Cancel</VButton>
-            <VButton variant="primary" :loading="submitting" @click="handleRename">Rename</VButton>
+            <VButton variant="secondary" @click="showRenameModal = false">{{ t('common:btn.cancel') }}</VButton>
+            <VButton variant="primary" :loading="submitting" @click="handleRename">{{ t('modal.btn.rename') }}</VButton>
         </template>
     </VModal>
 
     <!-- Rename Folder Modal -->
-    <VModal v-model="showRenameFolderModal" title="Rename Folder" maxWidth="sm">
-        <VInput v-model="newFolderRenameName" label="New Folder Name" placeholder="e.g. banners" required />
+    <VModal v-model="showRenameFolderModal" :title="t('modal.rename_folder.title')" maxWidth="sm">
+        <VInput v-model="newFolderRenameName" :label="t('modal.rename_folder.label')" :placeholder="t('modal.rename_folder.placeholder')" required />
         <template #footer>
-            <VButton variant="secondary" @click="showRenameFolderModal = false">Cancel</VButton>
-            <VButton variant="primary" :loading="submitting" @click="handleRenameFolder">Rename</VButton>
+            <VButton variant="secondary" @click="showRenameFolderModal = false">{{ t('common:btn.cancel') }}</VButton>
+            <VButton variant="primary" :loading="submitting" @click="handleRenameFolder">{{ t('modal.btn.rename') }}</VButton>
         </template>
     </VModal>
 
     <!-- Confirm Delete File(s) Dialog -->
     <VConfirmDialog
         v-model="showConfirmDialog"
-        :title="bulkDelete ? 'Delete Multiple Assets' : 'Delete Asset'"
+        :title="bulkDelete ? t('dialog.delete_multiple.title') : t('dialog.delete_asset.title')"
         :message="bulkDelete
-            ? `Are you sure you want to delete ${selectedFiles.length} files? This action cannot be undone.`
-            : 'Are you sure you want to delete this file? This action cannot be undone.'"
-        confirmText="Delete"
+            ? t('dialog.delete_multiple.message').replace('{count}', selectedFiles.length.toString())
+            : t('dialog.delete_asset.message')"
+        :confirmText="t('context.delete')"
         variant="danger"
         :loading="submitting"
         @confirm="handleDelete"
@@ -269,9 +269,9 @@
     <!-- Confirm Delete Folder Dialog -->
     <VConfirmDialog
         v-model="showConfirmFolderDelete"
-        title="Delete Folder"
-        :message="`Are you sure you want to delete folder &quot;${folderToDelete}&quot; and ALL its contents? This action cannot be undone.`"
-        confirmText="Delete"
+        :title="t('dialog.delete_folder.title')"
+        :message="t('dialog.delete_folder.message').replace('{folder}', folderToDelete)"
+        :confirmText="t('context.delete')"
         variant="danger"
         :loading="submitting"
         @confirm="handleDeleteFolder"
@@ -287,11 +287,14 @@ import VModal from '@/components/ui/VModal.vue'
 import VInput from '@/components/ui/VInput.vue'
 import VConfirmDialog from '@/components/ui/VConfirmDialog.vue'
 import adminApi from '@/api/adminApi'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n(['admin.media', 'common'])
 
 const scope = ref('upload')
 const scopes = [
-    { label: 'Public Assets', value: 'upload' },
-    { label: 'Private Storage', value: 'private' }
+    { label: 'scope.public_assets', value: 'upload' },
+    { label: 'scope.private_storage', value: 'private' }
 ]
 
 const currentPath = ref('')
